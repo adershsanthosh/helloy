@@ -1,7 +1,7 @@
 """
 Chat Client - Premium Elegant GUI using Tkinter
 """
-from tkinter import Tk, Frame, Label, Button, Entry, Canvas, Scrollbar, simpledialog
+from tkinter import Tk, Frame, Label, Button, Entry, Canvas, Scrollbar, simpledialog, Toplevel, StringVar, IntVar, Checkbutton, OptionMenu
 from tkinter import LEFT, RIGHT, Y, X, BOTH, END, DISABLED, NORMAL, W, E, NW, NE, SE, SW
 import socket
 import threading
@@ -603,7 +603,255 @@ class ChatClient:
     
     def show_settings(self):
         """Show settings menu"""
-        pass
+        settings_win = Toplevel(self.root)
+        settings_win.title("Settings")
+        settings_win.geometry("400x450")
+        settings_win.configure(bg=COLORS["bg_primary"])
+        settings_win.resizable(False, False)
+        
+        # Center settings window
+        settings_win.transient(self.root)
+        settings_win.grab_set()
+        
+        # Header
+        header = Frame(settings_win, bg=COLORS["bg_secondary"], height=60)
+        header.pack(fill=X)
+        header.pack_propagate(False)
+        
+        Label(
+            header,
+            text="⚙ Settings",
+            font=self.font_title,
+            fg=COLORS["text_primary"],
+            bg=COLORS["bg_secondary"]
+        ).pack(pady=15)
+        
+        # Settings content
+        content = Frame(settings_win, bg=COLORS["bg_primary"])
+        content.pack(fill=BOTH, expand=True, padx=20, pady=20)
+        
+        # Server Settings
+        Label(
+            content,
+            text="Server",
+            font=self.font_heading,
+            fg=COLORS["accent"],
+            bg=COLORS["bg_primary"]
+        ).pack(anchor=W, pady=(10, 10))
+        
+        # Host
+        Frame(content, bg=COLORS["border"], height=1).pack(fill=X, pady=(0, 10))
+        
+        host_frame = Frame(content, bg=COLORS["bg_primary"])
+        host_frame.pack(fill=X, pady=5)
+        
+        Label(
+            host_frame,
+            text="Host:",
+            font=self.font_body,
+            fg=COLORS["text_secondary"],
+            bg=COLORS["bg_primary"],
+            width=10,
+            anchor=W
+        ).pack(side=LEFT)
+        
+        host_entry = Entry(
+            host_frame,
+            font=self.font_body,
+            bg=COLORS["bg_tertiary"],
+            fg=COLORS["text_primary"],
+            bd=0,
+            highlightthickness=0
+        )
+        host_entry.insert(0, HOST)
+        host_entry.pack(side=LEFT, fill=X, expand=True)
+        
+        # Port
+        port_frame = Frame(content, bg=COLORS["bg_primary"])
+        port_frame.pack(fill=X, pady=5)
+        
+        Label(
+            port_frame,
+            text="Port:",
+            font=self.font_body,
+            fg=COLORS["text_secondary"],
+            bg=COLORS["bg_primary"],
+            width=10,
+            anchor=W
+        ).pack(side=LEFT)
+        
+        port_entry = Entry(
+            port_frame,
+            font=self.font_body,
+            bg=COLORS["bg_tertiary"],
+            fg=COLORS["text_primary"],
+            bd=0,
+            highlightthickness=0
+        )
+        port_entry.insert(0, str(PORT))
+        port_entry.pack(side=LEFT, fill=X, expand=True)
+        
+        # Appearance Settings
+        Label(
+            content,
+            text="Appearance",
+            font=self.font_heading,
+            fg=COLORS["accent"],
+            bg=COLORS["bg_primary"]
+        ).pack(anchor=W, pady=(20, 10))
+        
+        Frame(content, bg=COLORS["border"], height=1).pack(fill=X, pady=(0, 10))
+        
+        # Theme
+        theme_frame = Frame(content, bg=COLORS["bg_primary"])
+        theme_frame.pack(fill=X, pady=5)
+        
+        Label(
+            theme_frame,
+            text="Theme:",
+            font=self.font_body,
+            fg=COLORS["text_secondary"],
+            bg=COLORS["bg_primary"],
+            width=10,
+            anchor=W
+        ).pack(side=LEFT)
+        
+        theme_var = StringVar(value="dark")
+        theme_menu = OptionMenu(
+            theme_frame,
+            theme_var,
+            "dark",
+            "light"
+        )
+        theme_menu.config(
+            font=self.font_body,
+            bg=COLORS["bg_tertiary"],
+            fg=COLORS["text_primary"],
+            bd=0,
+            highlightthickness=0
+        )
+        theme_menu["menu"].config(
+            bg=COLORS["bg_tertiary"],
+            fg=COLORS["text_primary"]
+        )
+        theme_menu.pack(side=LEFT, fill=X, expand=True)
+        
+        # Notifications
+        notif_frame = Frame(content, bg=COLORS["bg_primary"])
+        notif_frame.pack(fill=X, pady=5)
+        
+        Label(
+            notif_frame,
+            text="Notify:",
+            font=self.font_body,
+            fg=COLORS["text_secondary"],
+            bg=COLORS["bg_primary"],
+            width=10,
+            anchor=W
+        ).pack(side=LEFT)
+        
+        notif_var = IntVar(value=1)
+        Checkbutton(
+            notif_frame,
+            text="Enable notifications",
+            variable=notif_var,
+            font=self.font_body,
+            fg=COLORS["text_primary"],
+            bg=COLORS["bg_primary"],
+            activebackground=COLORS["bg_primary"],
+            activeforeground=COLORS["text_primary"],
+            selectcolor=COLORS["bg_primary"]
+        ).pack(side=LEFT)
+        
+        # About Section
+        Label(
+            content,
+            text="About",
+            font=self.font_heading,
+            fg=COLORS["accent"],
+            bg=COLORS["bg_primary"]
+        ).pack(anchor=W, pady=(20, 10))
+        
+        Frame(content, bg=COLORS["border"], height=1).pack(fill=X, pady=(0, 10))
+        
+        about_frame = Frame(content, bg=COLORS["bg_tertiary"], padx=15, pady=15)
+        about_frame.pack(fill=X)
+        
+        Label(
+            about_frame,
+            text="Helloy Chat",
+            font=(FONT_PRIMARY, 12, "bold"),
+            fg=COLORS["text_primary"],
+            bg=COLORS["bg_tertiary"]
+        ).pack()
+        
+        Label(
+            about_frame,
+            text="Version 2.0",
+            font=self.font_small,
+            fg=COLORS["text_muted"],
+            bg=COLORS["bg_tertiary"]
+        ).pack()
+        
+        Label(
+            about_frame,
+            text="Premium GUI Chat Application",
+            font=self.font_small,
+            fg=COLORS["text_secondary"],
+            bg=COLORS["bg_tertiary"]
+        ).pack(pady=(5, 0))
+        
+        # Buttons
+        btn_frame = Frame(settings_win, bg=COLORS["bg_secondary"], height=50)
+        btn_frame.pack(fill=X)
+        btn_frame.pack_propagate(False)
+        
+        Button(
+            btn_frame,
+            text="Cancel",
+            font=self.font_body,
+            fg=COLORS["text_secondary"],
+            bg=COLORS["bg_tertiary"],
+            activebackground=COLORS["bg_tertiary"],
+            bd=0,
+            padx=20,
+            cursor="hand2",
+            command=settings_win.destroy
+        ).pack(side=LEFT, padx=10, pady=10)
+        
+        Button(
+            btn_frame,
+            text="Save",
+            font=self.font_body,
+            fg=COLORS["text_primary"],
+            bg=COLORS["accent"],
+            activebackground=COLORS["accent_hover"],
+            bd=0,
+            padx=20,
+            cursor="hand2",
+            command=lambda: self.save_settings(
+                host_entry.get(),
+                port_entry.get(),
+                theme_var.get(),
+                notif_var.get(),
+                settings_win
+            )
+        ).pack(side=RIGHT, padx=10, pady=10)
+        
+    def save_settings(self, host, port, theme, notifications, window):
+        """Save settings and apply"""
+        global HOST, PORT
+        
+        # Validate port
+        try:
+            PORT = int(port)
+        except ValueError:
+            self.add_message("Invalid port number", "error", "System")
+            return
+        
+        HOST = host
+        self.add_message(f"Settings saved - Host: {HOST}, Port: {PORT}", "success", "System")
+        window.destroy()
     
     def show_search(self):
         """Show search functionality"""
