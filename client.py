@@ -431,7 +431,7 @@ class ChatClient:
         # Version info
         version_label = Label(
             status,
-            text="v1.0",
+            text="v2.0",
             font=self.font_small,
             fg=COLORS["text_muted"],
             bg=COLORS["bg_secondary"]
