@@ -1,16 +1,19 @@
 """
 Chat Client - Premium Elegant GUI using Tkinter
 """
-from tkinter import Tk, Frame, Label, Button, Entry, Canvas, Scrollbar, simpledialog, Toplevel, StringVar, IntVar, Checkbutton, OptionMenu, FLAT
+from tkinter import Tk, Frame, Label, Button, Entry, Canvas, Scrollbar, simpledialog, Toplevel, StringVar, IntVar, Checkbutton, OptionMenu, FLAT, filedialog
 from tkinter import LEFT, RIGHT, Y, X, BOTH, END, DISABLED, NORMAL, W, E, NW, NE, SE, SW
 import socket
 import threading
 import time
 import random
+import os
+import json
 
 # Server configuration
 HOST = '127.0.0.1'
 PORT = 55555
+FILE_PORT = 55556
 
 # Font constants
 FONT_PRIMARY = "Segoe UI"
@@ -381,6 +384,22 @@ class ChatClient:
         input_container.pack(fill=X, pady=(0, 0))
         input_container.pack_propagate(False)
         
+        # Attachment button (paperclip)
+        self.attach_btn = Button(
+            input_container,
+            text="📎",
+            font=(FONT_PRIMARY, 16),
+            fg="#FFFFFF",
+            bg=COLORS["header_bg"],
+            activebackground=COLORS["accent_hover"],
+            bd=0,
+            padx=12,
+            pady=8,
+            cursor="hand2",
+            command=self.attach_file
+        )
+        self.attach_btn.pack(side=LEFT, padx=(10, 5))
+        
         # Message entry with rounded appearance
         self.msg_entry = Entry(
             input_container,
@@ -392,7 +411,7 @@ class ChatClient:
             highlightthickness=0,
             relief=FLAT
         )
-        self.msg_entry.pack(side=LEFT, fill=BOTH, expand=True, padx=(15, 8), pady=10)
+        self.msg_entry.pack(side=LEFT, fill=BOTH, expand=True, padx=(8, 5), pady=10)
         self.msg_entry.insert(0, "Type a message...")
         self.msg_entry.bind("<FocusIn>", lambda e: self.on_entry_focus(False))
         self.msg_entry.bind("<FocusOut>", lambda e: self.on_entry_focus(True))
@@ -489,12 +508,32 @@ class ChatClient:
         """Receive messages from server in a separate thread"""
         while self.running:
             try:
-                message = self.client_socket.recv(1024).decode('utf-8')
+                message = self.client_socket.recv(4096).decode('utf-8')
                 if message:
+                    # Check if it's a file message
+                    try:
+                        data = json.loads(message)
+                        if data.get('type') == 'file':
+                            self.root.after(0, lambda d=data: self._handle_file_message(d))
+                            continue
+                    except:
+                        pass
+                    
                     self._parse_user_update(message)
                     self.root.after(0, lambda m=message: self.add_message(m, "received", ""))
             except Exception:
                 break
+    
+    def _handle_file_message(self, data):
+        """Handle received file message"""
+        filename = data.get('filename', 'unknown')
+        sender = data.get('sender', 'Unknown')
+        filetype = data.get('filetype', 'file')
+        url = data.get('url', '')
+        
+        # Display file message
+        msg = f"📎 {filename}"
+        self.add_message(msg, "received", sender)
     
     def send_message(self, event=None):
         """Send a message to the server"""
@@ -511,6 +550,68 @@ class ChatClient:
                 self.msg_entry.delete(0, END)
             except Exception:
                 self.add_message("Failed to send message", "error", "System")
+    
+    def attach_file(self):
+        """Open file dialog to select photo/video"""
+        file_path = filedialog.askopenfilename(
+            title="Select Photo or Video",
+            filetypes=[
+                ("Media files", "*.jpg *.jpeg *.png *.gif *.bmp *.mp4 *.avi *.mov *.mkv"),
+                ("Photos", "*.jpg *.jpeg *.png *.gif *.bmp"),
+                ("Videos", "*.mp4 *.avi *.mov *.mkv"),
+                ("All files", "*.*")
+            ]
+        )
+        
+        if file_path:
+            self.send_file(file_path)
+    
+    def send_file(self, file_path):
+        """Send a file to the server"""
+        try:
+            filename = os.path.basename(file_path)
+            filesize = os.path.getsize(file_path)
+            
+            # Determine file type
+            ext = os.path.splitext(filename)[1].lower()
+            image_exts = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
+            video_exts = ['.mp4', '.avi', '.mov', '.mkv']
+            
+            if ext in image_exts:
+                filetype = 'image'
+            elif ext in video_exts:
+                filetype = 'video'
+            else:
+                filetype = 'file'
+            
+            self.add_message(f"Sending {filename}...", "system", "System")
+            
+            # Connect to file server
+            file_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            file_socket.connect((HOST, FILE_PORT))
+            
+            # Send metadata
+            metadata = json.dumps({
+                'filename': filename,
+                'size': filesize,
+                'sender': self.nickname,
+                'type': filetype
+            })
+            file_socket.send(metadata.encode('utf-8'))
+            
+            # Send file data
+            with open(file_path, 'rb') as f:
+                while True:
+                    chunk = f.read(4096)
+                    if not chunk:
+                        break
+                    file_socket.send(chunk)
+            
+            file_socket.close()
+            self.add_message(f"File sent: {filename}", "sent", self.nickname)
+            
+        except Exception as e:
+            self.add_message(f"Failed to send file: {e}", "error", "System")
     
     def add_message(self, message, msg_type, sender):
         """Add a message to the messages display"""
