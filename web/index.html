@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Helloy — Web Chat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <div class="logo">Helloy</div>
+        <div class="status">Online</div>
+      </header>
+      <div class="contacts" id="contacts"></div>
+    </aside>
+
+    <main class="chat">
+      <header class="chat-header">
+        <div class="chat-title">Chat</div>
+        <div id="userName" class="chat-user"></div>
+      </header>
+
+      <section id="messages" class="messages"></section>
+
+      <form id="form" class="composer">
+        <input id="input" autocomplete="off" placeholder="Type a message" />
+        <button>Send</button>
+      </form>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+:root{
+  --bg:#e5ddd5;
+  --sidebar:#ffffff;
+  --accent:#25D366;
+  --accent-dark:#128C7E;
+  --msg-me:#DCF8C6;
+  --msg-other:#ffffff;
+  --text:#111;
+}
+*{box-sizing:border-box}
+body,html{height:100%;margin:0;font-family:Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;height:100vh}
+.sidebar{width:300px;background:var(--sidebar);border-right:1px solid #ddd;display:flex;flex-direction:column}
+.sidebar-header{padding:18px;border-bottom:1px solid #eee}
+.logo{font-weight:700;font-size:20px}
+.status{font-size:12px;color:gray}
+.contacts{flex:1;overflow:auto;padding:8px}
+.contact{display:flex;align-items:center;padding:10px;border-radius:8px;cursor:pointer}
+.contact:hover{background:#f6f6f6}
+.avatar{width:44px;height:44px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;margin-right:12px}
+.contact .meta{flex:1}
+.contact .name{font-weight:600}
+.contact .sub{font-size:12px;color:gray}
+
+.chat{flex:1;display:flex;flex-direction:column}
+.chat-header{height:70px;padding:18px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}
+.messages{flex:1;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.composer{display:flex;padding:12px;border-top:1px solid #eee;background:transparent}
+.composer input{flex:1;padding:12px;border-radius:20px;border:1px solid #ccc;outline:none;margin-right:8px}
+.composer button{background:var(--accent);color:#fff;border:none;padding:10px 16px;border-radius:20px;cursor:pointer}
+
+.bubble{max-width:70%;padding:10px 14px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,0.05)}
+.bubble.me{align-self:flex-end;background:var(--msg-me)}
+.bubble.other{align-self:flex-start;background:var(--msg-other)}
+.meta-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.meta-row .name{font-weight:700;font-size:12px}
+.meta-row .time{font-size:11px;color:gray;margin-left:auto}
+
+.system{align-self:center;background:transparent;color:gray;font-size:13px}

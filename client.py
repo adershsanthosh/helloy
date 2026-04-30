@@ -1,7 +1,7 @@
 """
 Chat Client - Premium Elegant GUI using Tkinter
 """
-from tkinter import Tk, Frame, Label, Button, Entry, Canvas, Scrollbar, simpledialog, Toplevel, StringVar, IntVar, Checkbutton, OptionMenu
+from tkinter import Tk, Frame, Label, Button, Entry, Canvas, Scrollbar, simpledialog, Toplevel, StringVar, IntVar, Checkbutton, OptionMenu, FLAT
 from tkinter import LEFT, RIGHT, Y, X, BOTH, END, DISABLED, NORMAL, W, E, NW, NE, SE, SW
 import socket
 import threading
@@ -16,22 +16,27 @@ PORT = 55555
 FONT_PRIMARY = "Segoe UI"
 MSG_PLACEHOLDER = "Type a message..."
 
-# Premium color palette
+# WhatsApp-style color palette
 COLORS = {
-    "bg_primary": "#0f0f13",        # Deep black
-    "bg_secondary": "#1a1a23",      # Dark charcoal
-    "bg_tertiary": "#252532",       # Lighter charcoal
-    "accent": "#6366f1",            # Indigo accent
-    "accent_hover": "#818cf8",     # Light indigo
-    "text_primary": "#f8fafc",      # White text
-    "text_secondary": "#94a3b8",    # Gray text
-    "text_muted": "#64748b",        # Muted text
-    "success": "#10b981",          # Green
+    "bg_primary": "#E5DDD5",        # Light tan (chat background)
+    "bg_secondary": "#FFFFFF",     # White (sidebar)
+    "bg_tertiary": "#F0F0F0",       # Light gray
+    "accent": "#075E54",            # WhatsApp green (dark)
+    "accent_hover": "#128C7E",      # WhatsApp green (medium)
+    "text_primary": "#000000",      # Black text
+    "text_secondary": "#667781",    # Gray text
+    "text_muted": "#667781",        # Muted text
+    "success": "#25D366",           # WhatsApp light green
     "error": "#ef4444",             # Red
-    "border": "#2d2d3a",           # Subtle border
-    "message_sent": "#312e81",     # Indigo message bg
-    "message_received": "#1e1b4b", # Dark indigo bg
+    "border": "#E5DDD5",            # Border
+    "message_sent": "#DCF8C6",      # Sent bubble (green tint)
+    "message_received": "#FFFFFF", # Received bubble (white)
+    "header_bg": "#075E54",         # Header green
+    "online_indicator": "#25D366", # Online green
 }
+
+# Event constants
+EVENT_CONFIGURE = "<Configure>"
 
 class ChatClient:
     def __init__(self):
@@ -104,44 +109,44 @@ class ChatClient:
         self.create_status_bar(chat_area)
         
     def create_header(self, parent):
-        """Create premium header"""
-        header = Frame(parent, bg=COLORS["bg_secondary"], height=70)
+        """Create WhatsApp-style header"""
+        header = Frame(parent, bg=COLORS["header_bg"], height=70)
         header.pack(fill=X, pady=0)
         header.pack_propagate(False)
         
-        # Logo/Icon with glow effect
+        # Logo/Icon 
         icon_label = Label(
             header,
             text="💬",
             font=(FONT_PRIMARY, 28),
-            bg=COLORS["bg_secondary"]
+            bg=COLORS["header_bg"]
         )
         icon_label.pack(side=LEFT, padx=(20, 10))
         
         # Title and subtitle
-        title_frame = Frame(header, bg=COLORS["bg_secondary"])
+        title_frame = Frame(header, bg=COLORS["header_bg"])
         title_frame.pack(side=LEFT, fill=Y, pady=15)
         
         title_label = Label(
             title_frame,
             text="Helloy",
             font=self.font_title,
-            fg=COLORS["text_primary"],
-            bg=COLORS["bg_secondary"]
+            fg="#FFFFFF",
+            bg=COLORS["header_bg"]
         )
         title_label.pack(anchor=W)
         
         subtitle_label = Label(
             title_frame,
-            text="Connected",
+            text="Click to select chat",
             font=self.font_small,
-            fg=COLORS["success"],
-            bg=COLORS["bg_secondary"]
+            fg="#D1D7DB",
+            bg=COLORS["header_bg"]
         )
         subtitle_label.pack(anchor=W)
         
         # Header actions frame
-        actions_frame = Frame(header, bg=COLORS["bg_secondary"])
+        actions_frame = Frame(header, bg=COLORS["header_bg"])
         actions_frame.pack(side=RIGHT, padx=(0, 15), fill=Y)
         
         # Search button
@@ -149,9 +154,9 @@ class ChatClient:
             actions_frame,
             text="🔍",
             font=(FONT_PRIMARY, 14),
-            fg=COLORS["text_secondary"],
-            bg=COLORS["bg_secondary"],
-            activebackground=COLORS["bg_tertiary"],
+            fg="#FFFFFF",
+            bg=COLORS["header_bg"],
+            activebackground=COLORS["accent_hover"],
             bd=0,
             padx=12,
             cursor="hand2",
@@ -164,9 +169,9 @@ class ChatClient:
             actions_frame,
             text="⚙",
             font=(FONT_PRIMARY, 16),
-            fg=COLORS["text_secondary"],
-            bg=COLORS["bg_secondary"],
-            activebackground=COLORS["bg_tertiary"],
+            fg="#FFFFFF",
+            bg=COLORS["header_bg"],
+            activebackground=COLORS["accent_hover"],
             bd=0,
             padx=12,
             cursor="hand2",
@@ -191,9 +196,9 @@ class ChatClient:
         
         users_label = Label(
             sidebar_header,
-            text="Online Users",
-            font=self.font_heading,
-            fg=COLORS["text_primary"],
+            text="CHATS",
+            font=(FONT_PRIMARY, 12, "bold"),
+            fg="#667781",
             bg=COLORS["bg_secondary"]
         )
         users_label.pack(anchor=W, padx=15, pady=(15, 0))
@@ -201,7 +206,7 @@ class ChatClient:
         # Users count
         self.users_count_label = Label(
             sidebar_header,
-            text="0 online",
+            text="",
             font=self.font_small,
             fg=COLORS["text_muted"],
             bg=COLORS["bg_secondary"]
@@ -240,7 +245,7 @@ class ChatClient:
         # Users frame
         self.users_frame = Frame(self.users_canvas, bg=COLORS["bg_secondary"])
         self.users_canvas.create_window((0, 0), window=self.users_frame, anchor=NW)
-        self.users_frame.bind("<Configure>", lambda e: self.users_canvas.configure(scrollregion=self.users_canvas.bbox("all")))
+        self.users_frame.bind(EVENT_CONFIGURE, lambda e: self.users_canvas.configure(scrollregion=self.users_canvas.bbox("all")))
         
         # Add self to users list
         self.update_users_list()
@@ -267,12 +272,12 @@ class ChatClient:
         self.users_count_label.config(text=f"{total} online")
         
     def add_user_to_sidebar(self, username, is_me=False):
-        """Add a user to the sidebar list"""
-        user_frame = Frame(self.users_frame, bg=COLORS["bg_tertiary"], padx=10, pady=8)
-        user_frame.pack(fill=X, pady=(0, 5))
+        """Add a user to the sidebar list (WhatsApp-style)"""
+        user_frame = Frame(self.users_frame, bg=COLORS["bg_secondary"], padx=15, pady=12)
+        user_frame.pack(fill=X)
         
-        # Avatar circle
-        avatar = Frame(user_frame, bg=COLORS["accent"], width=32, height=32)
+        # Avatar circle with gradient-like effect
+        avatar = Frame(user_frame, bg=COLORS["accent"], width=49, height=49)
         avatar.pack(side=LEFT)
         avatar.pack_propagate(False)
         
@@ -281,46 +286,60 @@ class ChatClient:
         Label(
             avatar,
             text=initial,
-            font=(FONT_PRIMARY, 12, "bold"),
-            fg=COLORS["text_primary"],
+            font=(FONT_PRIMARY, 18, "bold"),
+            fg="#FFFFFF",
             bg=COLORS["accent"]
         ).place(relx=0.5, rely=0.5, anchor="center")
         
-        # Username and status
-        name_frame = Frame(user_frame, bg=COLORS["bg_tertiary"])
-        name_frame.pack(side=LEFT, padx=(10, 0), fill=Y, expand=True)
+        # Username and preview message
+        name_frame = Frame(user_frame, bg=COLORS["bg_secondary"])
+        name_frame.pack(side=LEFT, padx=(15, 0), fill=BOTH, expand=True)
         
         name_label = Label(
             name_frame,
             text=username + (" (You)" if is_me else ""),
-            font=self.font_username,
+            font=(FONT_PRIMARY, 14, "bold"),
             fg=COLORS["text_primary"],
-            bg=COLORS["bg_tertiary"]
+            bg=COLORS["bg_secondary"]
         )
         name_label.pack(anchor=W)
         
-        # Online indicator
-        status_label = Label(
+        # Preview text (like WhatsApp)
+        preview_label = Label(
             name_frame,
-            text="● Online",
-            font=self.font_small,
-            fg=COLORS["success"],
-            bg=COLORS["bg_tertiary"]
+            text="Click to chat" if not is_me else "Tap to chat",
+            font=(FONT_PRIMARY, 12),
+            fg=COLORS["text_muted"],
+            bg=COLORS["bg_secondary"]
         )
-        status_label.pack(anchor=W)
+        preview_label.pack(anchor=W)
+        
+        # Time (WhatsApp style)
+        time_label = Label(
+            user_frame,
+            text=time.strftime("%H:%M"),
+            font=(FONT_PRIMARY, 11),
+            fg=COLORS["text_muted"],
+            bg=COLORS["bg_secondary"]
+        )
+        time_label.pack(side=RIGHT, anchor=NE)
+        
+        # Separator line
+        sep = Frame(self.users_frame, bg=COLORS["border"], height=1)
+        sep.pack(fill=X, padx=75)
         
     def create_messages_area(self, parent):
-        """Create messages display area"""
-        # Messages container with rounded border
-        msg_container = Frame(parent, bg=COLORS["bg_secondary"])
-        msg_container.pack(fill=BOTH, expand=True, padx=15, pady=(15, 10))
+        """Create WhatsApp-style messages display area"""
+        # Messages container with WhatsApp background
+        msg_container = Frame(parent, bg=COLORS["bg_primary"])
+        msg_container.pack(fill=BOTH, expand=True, padx=0, pady=0)
         
         # Canvas for scrolling
         self.canvas = Canvas(
             msg_container,
-            bg=COLORS["bg_secondary"],
+            bg=COLORS["bg_primary"],
             highlightthickness=0,
-            highlightbackground=COLORS["bg_secondary"]
+            highlightbackground=COLORS["bg_primary"]
         )
         self.canvas.pack(side=LEFT, fill=BOTH, expand=True)
         
@@ -328,8 +347,8 @@ class ChatClient:
         scrollbar = Scrollbar(
             msg_container,
             command=self.canvas.yview,
-            bg=COLORS["bg_tertiary"],
-            troughcolor=COLORS["bg_secondary"],
+            bg=COLORS["bg_primary"],
+            troughcolor=COLORS["bg_primary"],
             activebackground=COLORS["accent"],
             bd=0,
             width=6
@@ -339,14 +358,14 @@ class ChatClient:
         self.canvas.configure(yscrollcommand=scrollbar.set)
         
         # Messages frame
-        self.messages_frame = Frame(self.canvas, bg=COLORS["bg_secondary"])
+        self.messages_frame = Frame(self.canvas, bg=COLORS["bg_primary"])
         self.canvas_window = self.canvas.create_window((0, 0), window=self.messages_frame, anchor=NW)
         
-        self.messages_frame.bind("<Configure>", self.on_frame_configure)
-        self.canvas.bind("<Configure>", self.on_canvas_configure)
+        self.messages_frame.bind(EVENT_CONFIGURE, self.on_frame_configure)
+        self.canvas.bind(EVENT_CONFIGURE, self.on_canvas_configure)
         
         # Welcome message
-        self.add_message("Welcome to Chat", "welcome", "System")
+        self.add_message("Welcome to Helloy Chat!", "welcome", "System")
         
     def on_frame_configure(self, event=None):
         """Reset scroll region"""
@@ -357,51 +376,43 @@ class ChatClient:
         self.canvas.itemconfig(self.canvas_window, width=event.width)
         
     def create_input_area(self, parent):
-        """Create premium input area"""
-        input_container = Frame(parent, bg=COLORS["bg_primary"], height=80)
-        input_container.pack(fill=X, pady=(0, 10))
+        """Create WhatsApp-style input area"""
+        input_container = Frame(parent, bg=COLORS["header_bg"], height=60)
+        input_container.pack(fill=X, pady=(0, 0))
         input_container.pack_propagate(False)
         
-        # Input wrapper with border and rounded corners effect
-        input_wrapper = Frame(input_container, bg=COLORS["bg_tertiary"], padx=5, pady=5)
-        input_wrapper.pack(side=LEFT, fill=BOTH, expand=True, padx=(15, 10))
-        
-        # Inner input frame
-        inner_input = Frame(input_wrapper, bg=COLORS["bg_tertiary"])
-        inner_input.pack(fill=BOTH, expand=True)
-        
-        # Message entry
+        # Message entry with rounded appearance
         self.msg_entry = Entry(
-            inner_input,
-            font=self.font_input,
-            bg=COLORS["bg_tertiary"],
-            fg=COLORS["text_muted"],
+            input_container,
+            font=(FONT_PRIMARY, 14),
+            bg="#FFFFFF",
+            fg=COLORS["text_primary"],
             insertbackground=COLORS["accent"],
             bd=0,
-            highlightthickness=0
+            highlightthickness=0,
+            relief=FLAT
         )
-        self.msg_entry.pack(side=LEFT, fill=BOTH, expand=True, padx=(10, 5), pady=10)
-        self.msg_entry.insert(0, MSG_PLACEHOLDER)
+        self.msg_entry.pack(side=LEFT, fill=BOTH, expand=True, padx=(15, 8), pady=10)
+        self.msg_entry.insert(0, "Type a message...")
         self.msg_entry.bind("<FocusIn>", lambda e: self.on_entry_focus(False))
         self.msg_entry.bind("<FocusOut>", lambda e: self.on_entry_focus(True))
         self.msg_entry.bind("<Return>", self.send_message)
         
-        # Send button with hover effect
+        # Send button (microphone icon style in WhatsApp)
         self.send_btn = Button(
-            inner_input,
-            text="Send",
-            font=(FONT_PRIMARY, 10, "bold"),
-            fg=COLORS["text_primary"],
-            bg=COLORS["accent"],
+            input_container,
+            text="➤",
+            font=(FONT_PRIMARY, 18),
+            fg="#FFFFFF",
+            bg=COLORS["header_bg"],
             activebackground=COLORS["accent_hover"],
-            activeforeground=COLORS["text_primary"],
             bd=0,
-            padx=25,
+            padx=15,
             pady=8,
             cursor="hand2",
             command=self.send_message
         )
-        self.send_btn.pack(side=LEFT, padx=(5, 5))
+        self.send_btn.pack(side=LEFT, padx=(5, 10))
         
         # Bind hover events
         self.send_btn.bind("<Enter>", lambda e: self.on_button_hover(True, self.send_btn))
@@ -461,12 +472,26 @@ class ChatClient:
             self.add_message(f"Connection failed: {e}", "error", "System")
             return False
     
+    def _parse_user_update(self, message):
+        """Parse join/leave messages to update users list"""
+        if " joined the chat!" in message:
+            new_user = message.replace(" joined the chat!", "")
+            if new_user != self.nickname and new_user not in self.connected_users:
+                self.connected_users.append(new_user)
+                self.update_users_list()
+        elif " left the chat!" in message:
+            left_user = message.replace(" left the chat!", "")
+            if left_user in self.connected_users:
+                self.connected_users.remove(left_user)
+                self.update_users_list()
+
     def receive_messages(self):
         """Receive messages from server in a separate thread"""
         while self.running:
             try:
                 message = self.client_socket.recv(1024).decode('utf-8')
                 if message:
+                    self._parse_user_update(message)
                     self.root.after(0, lambda m=message: self.add_message(m, "received", ""))
             except Exception:
                 break
@@ -489,117 +514,123 @@ class ChatClient:
     
     def add_message(self, message, msg_type, sender):
         """Add a message to the messages display"""
-        msg_frame = Frame(self.messages_frame, bg=COLORS["bg_secondary"])
-        msg_frame.pack(fill=X, pady=(5, 0))
-        
+        msg_frame = Frame(self.messages_frame, bg=COLORS["bg_primary"])
+        msg_frame.pack(fill=X, pady=(3, 0))
+
         # Determine colors based on message type
         if msg_type == "sent":
             bg_color = COLORS["message_sent"]
             prefix = "You"
-            align = E
         elif msg_type == "received":
             bg_color = COLORS["message_received"]
             prefix = sender if sender else "Unknown"
-            align = W
-        elif msg_type == "welcome":
-            bg_color = COLORS["bg_tertiary"]
-            prefix = ""
-            align = "center"
-        elif msg_type == "success":
-            bg_color = COLORS["bg_tertiary"]
-            prefix = ""
-            align = "center"
         elif msg_type == "error":
             bg_color = "#3f1a1a"
             prefix = ""
-            align = "center"
         else:
-            bg_color = COLORS["bg_tertiary"]
+            bg_color = COLORS["bg_primary"]
             prefix = ""
-            align = "center"
-        
+
         if msg_type in ["sent", "received"]:
-            # Message bubble with side alignment
-            bubble = Frame(msg_frame, bg=bg_color, padx=15, pady=10)
-            bubble.pack(fill=X, padx=10)
+            self._render_user_message(msg_frame, message, bg_color, prefix, msg_type)
+        else:
+            self._render_system_message(msg_frame, message, msg_type, bg_color)
+
+    def _render_user_message(self, msg_frame, message, bg_color, prefix, msg_type="received"):
+        """Render WhatsApp-style message bubbles"""
+        # Sent messages align right, received align left
+        if msg_type == "sent":
+            bubble = Frame(msg_frame, bg=bg_color, padx=10, pady=5)
+            bubble.pack(fill=X, padx=60, anchor=E)
             
-            # Sender name with avatar
-            sender_frame = Frame(bubble, bg=bg_color)
-            sender_frame.pack(fill=X)
-            
-            # Avatar circle
-            avatar = Frame(sender_frame, bg=COLORS["accent"], width=24, height=24)
-            avatar.pack(side=LEFT)
-            avatar.pack_propagate(False)
-            
-            # Avatar initial
-            initial = (sender or "?")[0].upper()
-            Label(
-                avatar,
-                text=initial,
-                font=(FONT_PRIMARY, 9, "bold"),
+            msg_label = Label(
+                bubble,
+                text=message,
+                font=(FONT_PRIMARY, 13),
                 fg=COLORS["text_primary"],
-                bg=COLORS["accent"]
-            ).place(relx=0.5, rely=0.5, anchor="center")
+                bg=bg_color,
+                wraplength=350,
+                justify=LEFT
+            )
+            msg_label.pack(anchor=E)
             
-            # Sender name
+            # Timestamp and checkmarks (WhatsApp style)
+            timestamp = time.strftime("%H:%M")
+            time_label = Label(
+                bubble,
+                text=f"{timestamp} ✓✓",
+                font=(FONT_PRIMARY, 9),
+                fg=COLORS["text_muted"],
+                bg=bg_color
+            )
+            time_label.pack(anchor=E)
+        else:
+            # Received message - left aligned
+            bubble = Frame(msg_frame, bg=bg_color, padx=10, pady=5)
+            bubble.pack(fill=X, padx=60, anchor=W)
+            
+            # Sender name (for group chats style)
             sender_label = Label(
-                sender_frame,
+                bubble,
                 text=prefix,
-                font=(FONT_PRIMARY, 9, "bold"),
+                font=(FONT_PRIMARY, 11, "bold"),
                 fg=COLORS["accent"],
                 bg=bg_color
             )
-            sender_label.pack(side=LEFT, padx=(8, 0))
+            sender_label.pack(anchor=W)
+            
+            msg_label = Label(
+                bubble,
+                text=message,
+                font=(FONT_PRIMARY, 13),
+                fg=COLORS["text_primary"],
+                bg=bg_color,
+                wraplength=350,
+                justify=LEFT
+            )
+            msg_label.pack(anchor=W)
             
             # Timestamp
             timestamp = time.strftime("%H:%M")
             time_label = Label(
-                sender_frame,
+                bubble,
                 text=timestamp,
-                font=(FONT_PRIMARY, 7),
+                font=(FONT_PRIMARY, 9),
                 fg=COLORS["text_muted"],
                 bg=bg_color
             )
-            time_label.pack(side=RIGHT)
-            
-            # Message text with word wrap
-            msg_label = Label(
-                bubble,
-                text=message,
-                font=self.font_message,
-                fg=COLORS["text_primary"],
-                bg=bg_color,
-                wraplength=450,
-                justify=LEFT
-            )
-            msg_label.pack(anchor=W, pady=(5, 0))
-        else:
-            # System message (centered)
-            system_frame = Frame(msg_frame, bg=bg_color, padx=20, pady=10)
-            system_frame.pack(fill=X, padx=50)
-            
-            # Icon based on message type
-            icon = "ℹ" if msg_type == "welcome" else "✓" if msg_type == "success" else "✕" if msg_type == "error" else ""
-            
-            if icon:
-                icon_label = Label(
-                    system_frame,
-                    text=icon,
-                    font=(FONT_PRIMARY, 12),
-                    fg=COLORS["success"] if msg_type == "success" else COLORS["error"] if msg_type == "error" else COLORS["text_muted"],
-                    bg=bg_color
-                )
-                icon_label.pack(side=LEFT, padx=(0, 8))
-            
-            msg_label = Label(
+            time_label.pack(anchor=W)
+
+    def _render_system_message(self, msg_frame, message, msg_type, bg_color):
+        system_frame = Frame(msg_frame, bg=bg_color, padx=20, pady=10)
+        system_frame.pack(fill=X, padx=50)
+
+        icon_map = {"welcome": "ℹ", "success": "✓", "error": "✕"}
+        icon = icon_map.get(msg_type, "")
+        if icon:
+            icon_color = COLORS["text_muted"]
+            if msg_type == "success":
+                icon_color = COLORS["success"]
+            elif msg_type == "error":
+                icon_color = COLORS["error"]
+
+            icon_label = Label(
                 system_frame,
-                text=message,
-                font=(FONT_PRIMARY, 9),
-                fg=COLORS["text_secondary"],
+                text=icon,
+                font=(FONT_PRIMARY, 12),
+                fg=icon_color,
                 bg=bg_color
             )
-            msg_label.pack()
+            icon_label.pack(side=LEFT, padx=(0, 8))
+
+        msg_label = Label(
+            system_frame,
+            text=message,
+            font=(FONT_PRIMARY, 9),
+            fg=COLORS["text_secondary"],
+            bg=bg_color
+        )
+        msg_label.pack()
     
     def show_settings(self):
         """Show settings menu"""
@@ -832,13 +863,11 @@ class ChatClient:
             command=lambda: self.save_settings(
                 host_entry.get(),
                 port_entry.get(),
-                theme_var.get(),
-                notif_var.get(),
                 settings_win
             )
         ).pack(side=RIGHT, padx=10, pady=10)
         
-    def save_settings(self, host, port, theme, notifications, window):
+    def save_settings(self, host, port, window):
         """Save settings and apply"""
         global HOST, PORT
         
